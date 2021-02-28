@@ -48,7 +48,7 @@ class GstPipeline:
         bus.connect('message', self.on_bus_message)
 
         # Set up a full screen window on Coral, no-op otherwise.
-        self.setup_window()
+        # self.setup_window()
 
     def run(self):
         # Start inference worker.

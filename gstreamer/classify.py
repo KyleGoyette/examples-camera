@@ -33,6 +33,14 @@ from pycoral.utils.edgetpu import run_inference
 from pycoral.adapters.common import input_size
 from pycoral.adapters.classify import get_classes
 
+def save_data(image,results,path,ext='png'):
+    """Saves camera frame and model inference results
+    to user-defined storage directory."""
+    tag = '%010d' % int(time.monotonic()*1000)
+    name = '%s/img-%s.%s' %(path,tag,ext)
+    image.save(name)
+    print('Frame saved as: %s' %name)
+
 def generate_svg(size, text_lines):
     svg = SVG(size)
     for y, line in enumerate(text_lines, start=1):
@@ -57,6 +65,8 @@ def main():
     parser.add_argument('--videofmt', help='Input video format.',
                         default='raw',
                         choices=['raw', 'h264', 'jpeg'])
+    parser.add_argument('--storage', help="Storage location of results, use path to mounted sd card",
+                        required=True)
     args = parser.parse_args()
 
     print('Loading {} with {} labels.'.format(args.model, args.labels))
@@ -83,7 +93,9 @@ def main():
       for result in results:
           text_lines.append('score={:.2f}: {}'.format(result.score, labels.get(result.id, result.id)))
       print(' '.join(text_lines))
-      return generate_svg(src_size, text_lines)
+      image = generate_svg(src_size, text_lines)
+      save_data(image, storage_dir, results)
+
 
     result = gstreamer.run_pipeline(user_callback,
                                     src_size=(640, 480),
